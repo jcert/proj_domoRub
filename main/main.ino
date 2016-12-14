@@ -1,11 +1,9 @@
 //includes
-//#include <IRremoteInt.h>
-//#include <IRremote.h>
 #include <LedControl.h>
 
 #define DEBUG true
 //matriz 8x8
-
+LedControl lc=LedControl(12,11,10,1); 
 
 
 //sensor de chama
@@ -19,7 +17,6 @@
 int ultimo_estado; //qual o ultimo estado em que esteve a chave de tilt
 long ultimo_stamp;
 int trocas;        //
-//LedControl lc=LedControl(12,11,10,1); 
 
 bool ler_chama(){
   int ir_sentido = analogRead(pin_chama);
@@ -28,7 +25,7 @@ bool ler_chama(){
   };
 
 void ler_oscila(){
-	if((time()-ultimo_stamp)<(tempo_sample*1000)){
+	if((millis()-ultimo_stamp)<(tempo_sample*1000)){
 		int nova_medida = digitalRead(pin_queda);
 		if (ultimo_estado != nova_medida) trocas++;
 	}else{
