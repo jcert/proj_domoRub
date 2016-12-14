@@ -4,8 +4,14 @@
 #define DEBUG true
 //matriz 8x8
 LedControl lc=LedControl(12,11,10,1); 
+bool mostra_terremoto;
+bool mostra_chama;
+#define tempo_display 10 //tempo, em segundos, após acabar o estado que ele mantem a a mensagem exibindo na tela 
+long stamp_display_chama;
+long stamp_display_terremoto;
 
 
+ 
 //sensor de chama
 #define pin_chama A0
 #define limiar_chama 500 // descobrir quanto ir uma chama manda e colocar aqui
@@ -28,32 +34,47 @@ void ler_oscila(){
 	if((millis()-ultimo_stamp)<(tempo_sample*1000)){
 		int nova_medida = digitalRead(pin_queda);
 		if (ultimo_estado != nova_medida) trocas++;
-	}else{
-		trocas = 0;
-	}
+   trocas = 0;
+  }
   };
 
 void se_oscilando_muito(){
-	if(trocas > alternacoes) mostra_terremoto();
+  if(trocas > alternacoes) mostra_terremoto = true;
+  else mostra_terremoto = false;
 };
 
 void se_muito_ir(){
-	if(ler_chama()) mostra_chama();
+  if(ler_chama()) mostra_chama = true;
+  else mostra_chama = false;
 };
 
-void mostra_terremoto(){
-//usa a matriz 8x8 para mostrar simbolo de terremoto
-}
-
-void mostra_chama(){
-//usa a matriz 8x8 para mostrar simbolo de chama
+void display_chama(){
+  if(mostra_chama){
+    stamp_display_chama = millis();
+    //mostra o simbolo de chama
+    }
+  if((stamp_display_chama+tempo_display*1000)<millis()){
+    //apaga o display   
+  }
 };
 
+void display_terremoto(){
+  if(mostra_terremoto){
+    stamp_display_terremoto = millis();
+    //mostra o simbolo de chama
+    }
+  if((stamp_display_terremoto+tempo_display*1000)<millis()){
+    //apaga o display   
+  }
+};
+  
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   trocas = 0;
   ultimo_estado = digitalRead(pin_queda);
+  mostra_chama = false;
+  mostra_terremoto = false;
 }
 void loop() {
   // put your main code here, to run repeatedly:
@@ -62,6 +83,9 @@ void loop() {
 
   se_oscilando_muito();//se sim, está em terremoto
   se_muito_ir();//tem uma chama no comodo
+
+  display_terremoto();
+  display_chama();
   delay(300);
 
 }
