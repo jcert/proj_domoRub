@@ -3,7 +3,7 @@
 
 #define DEBUG true
 //matriz 8x8
-LedControl lc=LedControl(12,11,10,1); 
+LedControl lc=LedControl(12,11,10,1);//3 primeiros sao os pinos do spi e o ultimo eh quantos controladores estao ligados 
 bool mostra_terremoto;
 bool mostra_chama;
 #define tempo_display 10 //tempo, em segundos, após acabar o estado que ele mantem a a mensagem exibindo na tela 
@@ -34,8 +34,11 @@ void ler_oscila(){
 	if((millis()-ultimo_stamp)<(tempo_sample*1000)){
 		int nova_medida = digitalRead(pin_queda);
 		if (ultimo_estado != nova_medida) trocas++;
-   trocas = 0;
-  }
+   	ultimo_estado = nova_medida;
+  	}else{
+		trocas = 0;		
+		ultimo_stamp = millis();
+	}
   };
 
 void se_oscilando_muito(){
@@ -77,7 +80,6 @@ void setup() {
   mostra_terremoto = false;
 }
 void loop() {
-  // put your main code here, to run repeatedly:
   ler_chama();
   ler_oscila();
 
