@@ -11,8 +11,31 @@ bool mostra_chama;
 long stamp_display_chama;
 long stamp_display_terremoto;
 
-bool display_symbol[2]; //[0] se em chama, [1] se em terremoto
+bool display_symbol[2]; 	//[0] se em chama, [1] se em terremoto
 
+bool buffer_dispaly[64]; 	//cada um dos pondos do display em matriz
+
+const bool display_vazio[64] = 
+	{1,1,1,1,1,1,1,1,
+	 1,0,0,0,0,0,0,1,
+	 1,0,0,0,0,0,0,1,
+	 1,0,0,0,0,0,0,1,
+	 1,0,0,0,0,0,0,1,
+	 1,0,0,0,0,0,0,1,
+	 1,0,0,0,0,0,0,1,
+	 1,1,1,1,1,1,1,1}; 
+
+const bool display_upper_chama[32] = 
+	{1,0,1,1,1,1,0,1,
+	 1,0,1,0,0,1,0,1,
+	 1,0,1,1,1,1,0,1,
+	 1,0,0,0,0,0,0,1};
+
+const bool display_lower_terre[32] = 
+	{1,0,0,1,1,0,0,1,
+	 1,0,0,1,1,0,0,1,
+	 1,0,0,1,1,0,0,1,
+	 1,0,0,1,1,0,0,1};
 
 //sensor de chama
 #define pin_chama A0
@@ -83,6 +106,13 @@ void display_terremoto() {
     display_symbol[1] = false;
   }
 };
+
+void display_refresh(){
+	//mostra no display os simbolos necessarios de acordo com o vetor de booleanos, se esta em chama ou/e terremoto
+
+
+};
+
 
 void setup() {
   // put your setup code here, to run once:
