@@ -119,6 +119,30 @@ void display_refresh(){
 	i/=8;//zera ao atingir 8
 };
 
+void modifica_display_buffer(){
+	if(display_symbol[0]){
+		buffer_display[0] = display_upper_chama[0];
+		buffer_display[1] = display_upper_chama[1];
+		buffer_display[2] = display_upper_chama[2];
+		buffer_display[3] = display_upper_chama[3];
+	}else{
+		buffer_display[0] = display_vazio[0];
+		buffer_display[1] = display_vazio[1];
+		buffer_display[2] = display_vazio[2];
+		buffer_display[3] = display_vazio[3];
+	}
+	if(display_symbol[1]){
+		buffer_display[4] = display_lower_terre[0];
+		buffer_display[5] = display_lower_terre[1];
+		buffer_display[6] = display_lower_terre[2];
+		buffer_display[7] = display_lower_terre[3];
+	}else{
+		buffer_display[4] = display_vazio[4];
+		buffer_display[5] = display_vazio[5];
+		buffer_display[6] = display_vazio[6];
+		buffer_display[7] = display_vazio[7];
+	}
+};
 
 void setup() {
   // put your setup code here, to run once:
@@ -140,7 +164,8 @@ void loop() {
   display_terremoto();
   display_chama();
 
-  display_refresh();//talvez colocar por interrupcao
+  modifica_display_buffer();
+  //display_refresh();//quase por interrupcao,,,,talvez colocar por interrupcao
   delay(300);
 
 }
