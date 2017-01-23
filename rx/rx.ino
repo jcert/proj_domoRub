@@ -31,6 +31,8 @@ bool mostra_chama;
 long stamp_display_chama;
 long stamp_display_terremoto;
 
+int buffer_ler_chama = false;
+
 bool display_symbol[2]; 	//[0] se em chama, [1] se em terremoto
 char index=0;
 volatile char buffer_display[8]; 	//cada um dos pondos do display em matriz
@@ -72,19 +74,17 @@ int ultimo_estado; //qual o ultimo estado em que esteve a chave de tilt
 long ultimo_stamp;
 int trocas;        //
 
-bool ler_chama() {
-  int ir_sentido = analogRead(pin_chama);
+bool ler_chama(int ir_sentido) {
   if (DEBUG) {
     Serial.print("ir: ");
     Serial.println(ir_sentido);
   }
+  buffer_ler_chama = ir_sentido < limiar_chama; //global com o ultimo valor lido
   return ir_sentido < limiar_chama;//quanto mais intensa a chama menor o valor do sensor
 };
 
-void ler_oscila() {
+void ler_oscila(int nova_medida) {
   if ((millis() - ultimo_stamp) < (tempo_sample * 1000)) {
-    
-    int nova_medida = digitalRead(pin_queda);
     if (ultimo_estado != nova_medida) trocas++;
     ultimo_estado = nova_medida;
   } else {
@@ -103,7 +103,7 @@ void se_oscilando_muito() {
 };
 
 void se_muito_ir() {
-  if (ler_chama()) mostra_chama = true;
+  if (buffer_ler_chama) mostra_chama = true;
   else mostra_chama = false;
 };
 
@@ -183,10 +183,17 @@ void setup() {
 
 void loop() {
   
-  if(radio.available()){
-    radio.read(recebido,1);
-    ler_chama();
-    ler_oscila();
+  while(radio.available()){
+    struct mensagem recebido;
+    radio.read(&recebido,sizeof(recebido));
+    switch(recebido.tipo){
+      case IR:
+        ler_chama(recebido.valor);
+      break;
+      case OSC:
+        ler_oscila(recebido.valor);      
+      break;
+      }
     }
 
   se_oscilando_muito();//se sim, está em terremoto
