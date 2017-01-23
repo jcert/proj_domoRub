@@ -1,9 +1,10 @@
 //includes
 #include <LedControl.h>
 
+
 #define DEBUG true
 //matriz 8x8
-LedControl lc = LedControl(12, 11, 10, 1); //3 primeiros sao os pinos do spi e o ultimo eh quantos controladores estao ligados
+LedControl lc = LedControl(51,52,53, 1); //3 primeiros sao os pinos do spi e o ultimo eh quantos controladores estao ligados
 bool mostra_terremoto;
 bool mostra_chama;
 #define tempo_display_chama 		10 //tempo, em segundos, após acabar o estado que ele mantem na tela a mensagem de chama 
@@ -12,7 +13,7 @@ long stamp_display_chama;
 long stamp_display_terremoto;
 
 bool display_symbol[2]; 	//[0] se em chama, [1] se em terremoto
-
+char index=0;
 volatile char buffer_display[8]; 	//cada um dos pondos do display em matriz
 
 const char display_vazio[8] = 
@@ -39,9 +40,6 @@ const char display_lower_terre[4] =
 
 volatile char display_col_index = 0; //qual linha do display deve ser atualizada
 
-ISR(TIMER2_COMPA_vect){
-	display_refresh();
-}
 
 //sensor de chama
 #define pin_chama A0
@@ -115,37 +113,40 @@ void display_terremoto() {
 
 void display_refresh(){
 	//mostra no display os simbolos necessarios de acordo com o vetor de booleanos, se esta em chama ou/e terremoto
-	setRow(1,i++,buffer_display[i]);		//escreve na linha e vai para a proxima
-	i/=8;//zera ao atingir 8
+	lc.setRow(0,index,buffer_display[index]);		//escreve na linha e vai para a proxima
+	++index/=8;//zera ao atingir 8
 };
 
 void modifica_display_buffer(){
 	if(display_symbol[0]){
-		buffer_display[0] = display_upper_chama[0];
-		buffer_display[1] = display_upper_chama[1];
-		buffer_display[2] = display_upper_chama[2];
-		buffer_display[3] = display_upper_chama[3];
+    lc.setRow(0,0,display_upper_chama[0]);
+    lc.setRow(0,1,display_upper_chama[1]);
+    lc.setRow(0,2,display_upper_chama[2]);
+    lc.setRow(0,3,display_upper_chama[3]);
 	}else{
-		buffer_display[0] = display_vazio[0];
-		buffer_display[1] = display_vazio[1];
-		buffer_display[2] = display_vazio[2];
-		buffer_display[3] = display_vazio[3];
+    
+    lc.setRow(0,0,display_vazio[0]);
+    lc.setRow(0,1,display_vazio[1]);
+    lc.setRow(0,2,display_vazio[2]);
+    lc.setRow(0,3,display_vazio[3]);
 	}
 	if(display_symbol[1]){
-		buffer_display[4] = display_lower_terre[0];
-		buffer_display[5] = display_lower_terre[1];
-		buffer_display[6] = display_lower_terre[2];
-		buffer_display[7] = display_lower_terre[3];
+    lc.setRow(0,4,display_lower_terre[0]);
+    lc.setRow(0,5,display_lower_terre[1]);
+    lc.setRow(0,6,display_lower_terre[2]);
+    lc.setRow(0,7,display_lower_terre[3]);
 	}else{
-		buffer_display[4] = display_vazio[4];
-		buffer_display[5] = display_vazio[5];
-		buffer_display[6] = display_vazio[6];
-		buffer_display[7] = display_vazio[7];
+    lc.setRow(0,4,display_vazio[4]);
+    lc.setRow(0,5,display_vazio[5]);
+    lc.setRow(0,6,display_vazio[6]);
+    lc.setRow(0,7,display_vazio[7]);
 	}
 };
 
 void setup() {
   // put your setup code here, to run once:
+  //Timer1.initialize(2000);//400Hz
+  //Timer1.attachInterrupt(display_refresh); 
   lc.shutdown(0,false);//acorda o driver de led
   lc.setIntensity(0,8);//intensidade do brilho
   Serial.begin(9600);
@@ -165,8 +166,6 @@ void loop() {
   display_chama();
 
   modifica_display_buffer();
-  //display_refresh();//quase por interrupcao,,,,talvez colocar por interrupcao
-  delay(300);
-
+  delay(200);
 }
 
