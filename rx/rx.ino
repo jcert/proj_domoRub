@@ -1,8 +1,27 @@
 //includes
 #include <LedControl.h>
-
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
 
 #define DEBUG true
+enum sensor { IR, OSC };
+struct mensagem { sensor tipo; int valor;};
+
+
+//Armazena os dados enviados
+int dados[1];
+
+//Inicializa a placa nos pinos 9 (CE) e 10 (CS) do Arduino
+RF24 radio(9,10);
+
+//Define o endereco para comunicacao entre os modulos
+const uint64_t pipe = 0xE14BC8C8C8C8;
+
+//Define os pinos dos botoes
+int pino_botao1 = 7;
+int pino_botao2 = 2;
+
 //matriz 8x8
 LedControl lc = LedControl(51,52,53, 1); //3 primeiros sao os pinos do spi e o ultimo eh quantos controladores estao ligados
 bool mostra_terremoto;
@@ -64,6 +83,7 @@ bool ler_chama() {
 
 void ler_oscila() {
   if ((millis() - ultimo_stamp) < (tempo_sample * 1000)) {
+    
     int nova_medida = digitalRead(pin_queda);
     if (ultimo_estado != nova_medida) trocas++;
     ultimo_estado = nova_medida;
@@ -154,10 +174,20 @@ void setup() {
   ultimo_estado = digitalRead(pin_queda);
   mostra_chama = false;
   mostra_terremoto = false;
+  
+  //Inicializa a comunicacao
+  radio.begin();
+  //Entra em modo de transmissao
+  radio.openWritingPipe(pipe);
 }
+
 void loop() {
-  ler_chama();
-  ler_oscila();
+  
+  if(radio.available()){
+    radio.read(recebido,1);
+    ler_chama();
+    ler_oscila();
+    }
 
   se_oscilando_muito();//se sim, está em terremoto
   se_muito_ir();//tem uma chama no comodo
@@ -168,4 +198,6 @@ void loop() {
   modifica_display_buffer();
   delay(200);
 }
+
+
 
